@@ -77,7 +77,7 @@ public class HelloApplication extends Application {
 
     private void startTest(Scene sc) {
         /* Ghetto timer solution
-                - Atomic references ensure that all operations upon the reference are completed prior to access
+                - AtomicReference ensures that all operations upon the reference are completed prior to access
                 - For some reason it wanted the timer to be final or "effectively final" within the lambda
                 - Got around this by making the timer information atomic using AtomicReference
          */
