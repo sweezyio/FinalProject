@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -17,6 +16,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,7 +24,7 @@ public class HelloApplication extends Application {
     //
     // CONSTANTS
     //
-    final int WORD_COUNT = 10;
+    int WORD_COUNT = 5; // Default is set only as a precaution
 
     //
     // ACCESS GLOBALS
@@ -45,7 +45,7 @@ public class HelloApplication extends Application {
         stage.setScene(sc);
         stage.show();
 
-        // Start button functionality
+        // 'Start' button functionality
         startButton.setOnAction((e) -> {
             stage.setScene(testScene);
             startTest(testScene);
@@ -65,7 +65,7 @@ public class HelloApplication extends Application {
         title.setFont(new Font("Papyrus", 100));
         title.setAlignment(Pos.TOP_CENTER);
 
-        // Start button styling
+        // 'Start' button styling
         startButton.setPadding(new Insets(25, 25, 25, 25));
         startButton.setFont(Font.font("Papyrus", FontWeight.BOLD, 36.0));
 
@@ -81,11 +81,16 @@ public class HelloApplication extends Application {
                 - For some reason it wanted the timer to be final or "effectively final" within the lambda
                 - Got around this by making the timer information atomic using AtomicReference
          */
-        AtomicLong startTime = new AtomicLong(System.currentTimeMillis());
-        AtomicReference<AtomicLong> difference = new AtomicReference<>();
+        AtomicLong startTime = new AtomicLong();
+        AtomicLong difference = new AtomicLong();
+        AtomicBoolean isFirstCharacterTyped = new AtomicBoolean(true);
 
         // Primary logic for the display of words
         sc.setOnKeyTyped((e) -> {
+            if(isFirstCharacterTyped.get()) {
+                startTime.set(System.currentTimeMillis());
+                isFirstCharacterTyped.set(false);
+            }
             // Checks typed characters against the next character in the test text
             if(e.getCharacter().equals(String.valueOf(lb.getText().charAt(0)))) {
                 // So long as the test text is longer than 1 character, remove the first character
@@ -97,10 +102,10 @@ public class HelloApplication extends Application {
                     lb.setText("");
 
                     // Calculate time elapsed
-                    difference.set(new AtomicLong(System.currentTimeMillis() - startTime.get()));
+                    difference.set(System.currentTimeMillis() - startTime.get());
 
                     // Convert time from milliseconds to seconds and proceed to results scene
-                    resultsScene = makeResultScene((double)difference.get().get() / 1000);
+                    resultsScene = makeResultScene((double)difference.get() / 1000);
                     s.setScene(resultsScene);
                     //System.out.println((double)difference.get().get() / 1000);
                 }
@@ -113,7 +118,8 @@ public class HelloApplication extends Application {
         BorderPane bp = new BorderPane();
         lb = new Label(generateWordList(WORD_COUNT));
         lb.setEllipsisString("");
-        lb.setFont(new Font("Monsterrat Medium", 96));
+        lb.setFont(Font.font("Papyrus", FontWeight.BOLD, 96.0));
+        // lb.setFont(new Font("Monsterrat Medium", 96));
         bp.setCenter(lb);
 
         // Spacer to achieve the floating-in-the-middle-of-the-screen effect
