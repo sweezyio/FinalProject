@@ -7,10 +7,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ public class HelloApplication extends Application {
     // ACCESS GLOBALS
     //
     Label lb;
-    Scene testScene = makeTestScene();
+    Scene testScene;
     Button startButton = new Button("Start");
     Scene resultsScene;
     Stage s;
@@ -47,8 +50,7 @@ public class HelloApplication extends Application {
 
         // 'Start' button functionality
         startButton.setOnAction((e) -> {
-            stage.setScene(testScene);
-            startTest(testScene);
+            stage.setScene(difficultySelectionScreen());
         });
     }
 
@@ -73,6 +75,43 @@ public class HelloApplication extends Application {
         vb.getChildren().addAll(title, startButton);
 
         return new Scene(bp, 800, 600);
+    }
+
+    private Scene difficultySelectionScreen() {
+        // Create primary containers
+        BorderPane outerContainer = new BorderPane();
+        VBox centeredContainer = new VBox();
+        HBox buttonContainer = new HBox();
+        centeredContainer.setSpacing(30);
+        centeredContainer.setAlignment(Pos.CENTER);
+        buttonContainer.setSpacing(30);
+        buttonContainer.setAlignment(Pos.CENTER);
+        outerContainer.setCenter(centeredContainer);
+
+        // Create, style, and add title to container
+        Label title = new Label("Select Difficulty");
+        title.setFont(new Font("Papyrus", 100));
+        title.setAlignment(Pos.TOP_CENTER);
+        centeredContainer.getChildren().add(title);
+
+        // Create, style, and add difficulty buttons to container
+        Button easyButton = new Button("Easy\n(10 Words)");
+        Button mediumButton = new Button("Medium\n(25 Words)");
+        Button hardButton = new Button("Hard\n(50 Words)");
+        Button extremeButton = new Button("Extreme\n(100 Words)");
+        easyButton.setTextAlignment(TextAlignment.CENTER);
+        mediumButton.setTextAlignment(TextAlignment.CENTER);
+        hardButton.setTextAlignment(TextAlignment.CENTER);
+        extremeButton.setTextAlignment(TextAlignment.CENTER);
+        buttonContainer.getChildren().addAll(easyButton, mediumButton, hardButton, extremeButton);
+        centeredContainer.getChildren().add(buttonContainer);
+
+        easyButton.setOnAction((e) -> startTest(10));
+        mediumButton.setOnAction((e) -> startTest(25));
+        hardButton.setOnAction((e) -> startTest(50));
+        extremeButton.setOnAction((e) -> startTest(100));
+
+        return new Scene(outerContainer, 800, 600);
     }
 
     private void startTest(Scene sc) {
@@ -119,7 +158,6 @@ public class HelloApplication extends Application {
         lb = new Label(generateWordList(WORD_COUNT));
         lb.setEllipsisString("");
         lb.setFont(Font.font("Papyrus", FontWeight.BOLD, 96.0));
-        // lb.setFont(new Font("Monsterrat Medium", 96));
         bp.setCenter(lb);
 
         // Spacer to achieve the floating-in-the-middle-of-the-screen effect
@@ -150,6 +188,9 @@ public class HelloApplication extends Application {
         return new Scene(bp, 800, 600);
     }
 
+    /*
+     *  UTILITY METHODS
+     */
     // Generate the test text from word list file
     private String generateWordList(int numWords) {
         // Read all words from file
@@ -165,6 +206,15 @@ public class HelloApplication extends Application {
         }
 
         return String.valueOf(wordList).trim();
+    }
+
+    // Initializes the test scene with a given number of words
+    // Just to cut down on repeated code
+    private void startTest(int numWords) {
+        WORD_COUNT = numWords;
+        testScene = makeTestScene();
+        s.setScene(testScene);
+        startTest(testScene);
     }
 
     public static void main(String[] args) {
