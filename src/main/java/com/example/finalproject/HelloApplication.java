@@ -6,13 +6,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
@@ -21,22 +21,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HelloApplication extends Application {
     //
     // CONSTANTS
     //
-    int WORD_COUNT = 5; // Default is set only as a precaution
+    int WORD_COUNT = 10; // Default is set only as a precaution
 
     //
     // ACCESS GLOBALS
     //
-    Label lb;
-    Scene testScene;
-    Button startButton = new Button("Start");
-    Scene resultsScene;
-    Stage s;
+    private Label lb;
+    private Scene testScene;
+    private final Button startButton = new Button("Start");
+    private Scene resultsScene;
+    private Stage s;
+    private final ProgressBar progress = new ProgressBar(0);
+    private final String[] progressColors = new String[]{"FF0000", "FF1100", "FF2200", "FF3300", "FF4400", "FF5500", "FF6600", "FF7700", "FF8800", "FF9900", "FFAA00", "FFBB00", "FFCC00", "FFDD00", "FFEE00", "FFFF00", "EEFF00", "DDFF00", "CCFF00", "BBFF00", "AAFF00", "99FF00", "88FF00", "77FF00", "66FF00", "55FF00", "44FF00", "33FF00", "22FF00", "11FF00", "00FF00"};
+
 
     public void start(Stage stage) throws IOException {
         // Make stage accessible globally
@@ -47,6 +49,7 @@ public class HelloApplication extends Application {
         Scene sc = makeScene();
         stage.setScene(sc);
         stage.show();
+        stage.setResizable(false);
 
         // 'Start' button functionality
         startButton.setOnAction((e) -> {
@@ -106,6 +109,7 @@ public class HelloApplication extends Application {
         buttonContainer.getChildren().addAll(easyButton, mediumButton, hardButton, extremeButton);
         centeredContainer.getChildren().add(buttonContainer);
 
+        // Define button functionality
         easyButton.setOnAction((e) -> startTest(10));
         mediumButton.setOnAction((e) -> startTest(25));
         hardButton.setOnAction((e) -> startTest(50));
@@ -123,6 +127,7 @@ public class HelloApplication extends Application {
         AtomicLong startTime = new AtomicLong();
         AtomicLong difference = new AtomicLong();
         AtomicBoolean isFirstCharacterTyped = new AtomicBoolean(true);
+        double initialLength = lb.getText().length();
 
         // Primary logic for the display of words
         sc.setOnKeyTyped((e) -> {
@@ -137,6 +142,9 @@ public class HelloApplication extends Application {
                     lb.setText(lb.getText().substring(1));
                 // Final character logic
                 } else {
+                    // Kill key typed logic
+                    sc.setOnKeyTyped((event) -> {});
+
                     // Set remaining text to nothing
                     lb.setText("");
 
@@ -148,6 +156,11 @@ public class HelloApplication extends Application {
                     s.setScene(resultsScene);
                     //System.out.println((double)difference.get().get() / 1000);
                 }
+
+                // Update progress bar progress and color
+                double percentDone = (double)1 - (lb.getText().length() / initialLength);
+                progress.setProgress(percentDone);
+                progress.setStyle("-fx-accent: #" + progressColors[(int) Math.ceil(progressColors.length * percentDone) - 1]);
             }
         });
     }
@@ -164,6 +177,15 @@ public class HelloApplication extends Application {
         Rectangle spacer = new Rectangle();
         spacer.setWidth(400);
         bp.setLeft(spacer);
+
+        // ProgressBar styling
+        HBox hb = new HBox();
+        //hb.getChildren().add(progress);
+        hb.setAlignment(Pos.CENTER);
+        hb.setPadding(new Insets(100));
+        bp.setBottom(progress);
+        progress.setPrefSize(800, 30);
+        progress.setStyle("-fx-accent: #FF0000");
 
         return new Scene(bp, 800, 600);
     }
