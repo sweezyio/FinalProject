@@ -4,9 +4,9 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -18,7 +18,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -128,6 +130,7 @@ public class HelloApplication extends Application {
         AtomicLong difference = new AtomicLong();
         AtomicBoolean isFirstCharacterTyped = new AtomicBoolean(true);
         double initialLength = lb.getText().length();
+        progress.setProgress(0);
 
         // Primary logic for the display of words
         sc.setOnKeyTyped((e) -> {
@@ -202,13 +205,27 @@ public class HelloApplication extends Application {
         Label title = new Label("Results");
         title.setFont(Font.font("Papyrus", FontWeight.BOLD, 72.0));
         title.setAlignment(Pos.TOP_CENTER);
-        Label speed = new Label(Math.round(((double)WORD_COUNT / time) * 60) + " WPM"); // Calculate WPM from time elapsed
+        double calcedSpeed = Math.round(((double)WORD_COUNT / time) * 60);
+        Label speed = new Label((int)calcedSpeed + " WPM"); // Calculate WPM from time elapsed
+        speed.setFont(Font.font("Monsterrat", FontWeight.BOLD, 48));
+
+        Button homeButton = new Button("Home");
+        homeButton.setMaxWidth(75);
+        homeButton.setPadding(new Insets(10));
+        homeButton.setMaxHeight(10);
+        homeButton.setDefaultButton(false);
 
         // Add all to the container
-        vb.getChildren().addAll(title, speed);
+        vb.getChildren().addAll(title, speed, homeButton);
+
+        homeButton.setOnAction((e) -> {
+            s.setScene(makeScene());
+        });
 
         return new Scene(bp, 800, 600);
     }
+
+
 
     /*
      *  UTILITY METHODS
